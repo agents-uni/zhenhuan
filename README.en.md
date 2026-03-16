@@ -86,7 +86,7 @@ npm install
 ### Start the server
 
 ```bash
-# Global install, then use directly
+# Global install, then use from any directory
 npm install -g @agents-uni/zhenhuan
 zhenhuan serve
 
@@ -95,7 +95,12 @@ npm start
 
 # Or with npx (no global install needed)
 npx @agents-uni/zhenhuan serve
+
+# Use a custom spec file
+zhenhuan serve --spec /path/to/my-universe.yaml
 ```
+
+> 💡 **Path resolution**: `zhenhuan` first looks for `universe.yaml` in the current directory. If not found, it automatically uses the built-in default palace configuration. You can also specify a custom spec file with `--spec`.
 
 On startup, it prints the access URLs:
 

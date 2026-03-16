@@ -86,7 +86,7 @@ npm install
 ### 启动服务器
 
 ```bash
-# 全局安装后直接使用
+# 全局安装后，在任意目录直接使用
 npm install -g @agents-uni/zhenhuan
 zhenhuan serve
 
@@ -95,7 +95,12 @@ npm start
 
 # 或用 npx（无需全局安装）
 npx @agents-uni/zhenhuan serve
+
+# 使用自定义规范文件
+zhenhuan serve --spec /path/to/my-universe.yaml
 ```
+
+> 💡 **路径解析逻辑**：`zhenhuan` 会优先查找当前目录下的 `universe.yaml`，找不到时自动使用包自带的默认甄嬛后宫配置。你也可以通过 `--spec` 显式指定规范文件路径。
 
 启动后会打印访问链接：
 

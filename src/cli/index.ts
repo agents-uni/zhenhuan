@@ -6,8 +6,41 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
+import { resolve, dirname, join } from 'node:path';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { PalaceOrchestrator } from '../orchestrator/index.js';
 import { startServer } from '../server/index.js';
+
+/**
+ * 解析 universe.yaml 路径：
+ * 1. 用户显式指定 --spec → 直接用
+ * 2. CWD 下存在 universe.yaml → 用它
+ * 3. fallback 到包自带的 universe.yaml（全局安装场景）
+ */
+function resolveSpec(specOpt: string): string {
+  // 用户显式传了绝对路径或非默认值
+  if (specOpt !== 'universe.yaml') {
+    return resolve(specOpt);
+  }
+
+  // CWD 下有 universe.yaml，优先使用
+  const cwdSpec = resolve('universe.yaml');
+  if (existsSync(cwdSpec)) {
+    return cwdSpec;
+  }
+
+  // fallback: 包目录下的 universe.yaml（npm 全局安装场景）
+  const __dirname = dirname(fileURLToPath(import.meta.url));
+  const bundledSpec = join(__dirname, '..', '..', 'universe.yaml');
+  if (existsSync(bundledSpec)) {
+    console.log(chalk.gray(`  ℹ 使用内置 universe.yaml (${bundledSpec})`));
+    return bundledSpec;
+  }
+
+  // 都找不到，返回原始路径（让后续报一个清晰的错误）
+  return cwdSpec;
+}
 
 const program = new Command();
 
@@ -24,11 +57,11 @@ program
   .option('-p, --port <port>', '端口号', '8089')
   .option('-s, --spec <path>', '规范文件路径', 'universe.yaml')
   .action(async (opts) => {
+    const specPath = resolveSpec(opts.spec);
+
     // Auto-register in uni-registry on serve
     try {
-      const { resolve } = await import('node:path');
       const { registerUni, parseSpecFile } = await import('@agents-uni/core');
-      const specPath = resolve(opts.spec);
       const config = parseSpecFile(specPath);
       registerUni(config, specPath);
       console.log(chalk.gray(`  ✓ 已注册到 uni-registry`));
@@ -38,7 +71,7 @@ program
 
     await startServer({
       port: parseInt(opts.port, 10),
-      specPath: opts.spec,
+      specPath,
     });
   });
 
@@ -49,7 +82,7 @@ program
   .description('查看后宫状态')
   .option('-s, --spec <path>', '规范文件路径', 'universe.yaml')
   .action(async (opts) => {
-    const orchestrator = await PalaceOrchestrator.fromSpec(opts.spec);
+    const orchestrator = await PalaceOrchestrator.fromSpec(resolveSpec(opts.spec));
 
     const state = orchestrator.getState();
 
@@ -98,7 +131,7 @@ program
   .description('查看 ELO 排行榜')
   .option('-s, --spec <path>', '规范文件路径', 'universe.yaml')
   .action(async (opts) => {
-    const orchestrator = await PalaceOrchestrator.fromSpec(opts.spec);
+    const orchestrator = await PalaceOrchestrator.fromSpec(resolveSpec(opts.spec));
 
     const board = orchestrator.getLeaderboard();
 
@@ -135,7 +168,7 @@ program
   .description('召开朝会')
   .option('-s, --spec <path>', '规范文件路径', 'universe.yaml')
   .action(async (opts) => {
-    const orchestrator = await PalaceOrchestrator.fromSpec(opts.spec);
+    const orchestrator = await PalaceOrchestrator.fromSpec(resolveSpec(opts.spec));
 
     console.log(chalk.yellow('\n═══ 朝会开始 ═══\n'));
 
@@ -162,7 +195,7 @@ program
   .option('--openclaw-dir <dir>', 'OpenClaw 目录', '')
   .option('-s, --spec <path>', '规范文件路径', 'universe.yaml')
   .action(async (opts) => {
-    const orchestrator = await PalaceOrchestrator.fromSpec(opts.spec);
+    const orchestrator = await PalaceOrchestrator.fromSpec(resolveSpec(opts.spec));
 
     const agentDef = {
       id: opts.id as string,
@@ -223,7 +256,7 @@ program
   .option('-s, --spec <path>', '规范文件路径', 'universe.yaml')
   .option('--agents <ids>', '参赛 Agent ID (逗号分隔，默认全部嫔妃)', '')
   .action(async (opts) => {
-    const orchestrator = await PalaceOrchestrator.fromSpec(opts.spec);
+    const orchestrator = await PalaceOrchestrator.fromSpec(resolveSpec(opts.spec));
 
     // Determine participants: all agents by default (emperor is the user, not an agent)
     let participants: string[];
