@@ -74,6 +74,12 @@
 ### 安装
 
 ```bash
+# 作为依赖使用
+npm install @agents-uni/zhenhuan
+
+# 或克隆仓库本地开发
+git clone https://github.com/agents-uni/zhenhuan.git
+cd zhenhuan
 npm install
 ```
 
@@ -114,7 +120,7 @@ npm run zhenhuan leaderboard
 ### 编程式调用赛马（自动调度）
 
 ```typescript
-import { PalaceOrchestrator } from 'zhenhuan-uni';
+import { PalaceOrchestrator } from '@agents-uni/zhenhuan';
 
 const orchestrator = await PalaceOrchestrator.fromSpec('universe.yaml');
 
@@ -414,7 +420,7 @@ cp src/agents/souls/huafei.md ~/.openclaw/workspace-huafei/SOUL.md
 ### 一键赛马
 
 ```typescript
-import { PalaceOrchestrator } from 'zhenhuan-uni';
+import { PalaceOrchestrator } from '@agents-uni/zhenhuan';
 
 const orchestrator = await PalaceOrchestrator.fromSpec('universe.yaml');
 
@@ -546,7 +552,7 @@ npm run build
 
 ## 相关项目
 
-- [**agents-uni-core**](../agents-uni-core) — 本项目底层的通用 Agent 组织协议层
+- [**@agents-uni/core**](https://github.com/agents-uni/core) — 本项目底层的通用 Agent 组织协议层 ([npm](https://www.npmjs.com/package/@agents-uni/core))
 
 ## License
 

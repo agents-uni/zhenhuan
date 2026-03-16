@@ -74,6 +74,12 @@ Built on [@agents-uni/core](https://github.com/agents-uni/core), it models a com
 ### Install
 
 ```bash
+# Use as a dependency
+npm install @agents-uni/zhenhuan
+
+# Or clone the repo for local development
+git clone https://github.com/agents-uni/zhenhuan.git
+cd zhenhuan
 npm install
 ```
 
@@ -114,7 +120,7 @@ npm run zhenhuan leaderboard
 ### Run a horse race (auto-dispatch)
 
 ```typescript
-import { PalaceOrchestrator } from 'zhenhuan-uni';
+import { PalaceOrchestrator } from '@agents-uni/zhenhuan';
 
 const orchestrator = await PalaceOrchestrator.fromSpec('universe.yaml');
 
@@ -414,7 +420,7 @@ cp src/agents/souls/huafei.md ~/.openclaw/workspace-huafei/SOUL.md
 ### One-Click Race
 
 ```typescript
-import { PalaceOrchestrator } from 'zhenhuan-uni';
+import { PalaceOrchestrator } from '@agents-uni/zhenhuan';
 
 const orchestrator = await PalaceOrchestrator.fromSpec('universe.yaml');
 
@@ -544,7 +550,7 @@ npm run build
 
 ## Related Projects
 
-- [**agents-uni-core**](../agents-uni-core) — The universal protocol layer this project is built on
+- [**@agents-uni/core**](https://github.com/agents-uni/core) — The universal protocol layer this project is built on ([npm](https://www.npmjs.com/package/@agents-uni/core))
 
 ## License
 

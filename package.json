@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "zhenhuan": "dist/cli/index.ts"
+    "zhenhuan": "dist/cli/index.js"
   },
   "exports": {
     ".": {
@@ -16,6 +16,7 @@
   },
   "files": [
     "dist",
+    "src/agents/souls/",
     "universe.yaml",
     "README.md",
     "README.en.md",
