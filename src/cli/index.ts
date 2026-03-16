@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Zhen Huan CLI - 后宫命令行工具
  */

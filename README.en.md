@@ -86,9 +86,15 @@ npm install
 ### Start the server
 
 ```bash
+# Global install, then use directly
+npm install -g @agents-uni/zhenhuan
+zhenhuan serve
+
+# Or in the project directory
 npm start
-# or
-npm run zhenhuan serve
+
+# Or with npx (no global install needed)
+npx @agents-uni/zhenhuan serve
 ```
 
 On startup, it prints the access URLs:
@@ -303,24 +309,27 @@ The server will:
 
 ## CLI
 
+After global install, use the `zhenhuan` command directly, or call via `npx @agents-uni/zhenhuan`:
+
 ```bash
 # Start the server (default port 8089, prints homepage URL on startup)
-npm run zhenhuan serve
+zhenhuan serve
+# or: npx @agents-uni/zhenhuan serve
 
 # View palace status (ranks, ELO, favor)
-npm run zhenhuan status
+zhenhuan status
 
 # View ELO leaderboard
-npm run zhenhuan leaderboard
+zhenhuan leaderboard
 
 # Conduct a court assembly (monthly review)
-npm run zhenhuan court
+zhenhuan court
 
 # 🆕 Selection — one-click register a new agent
-npm run zhenhuan select --id new-agent --name "New Consort" --role Answering
+zhenhuan select --id new-agent --name "New Consort" --role Answering
 
 # Also register in openclaw.json
-npm run zhenhuan select --id new-agent --name "New Consort" --register
+zhenhuan select --id new-agent --name "New Consort" --register
 ```
 
 ## Roles

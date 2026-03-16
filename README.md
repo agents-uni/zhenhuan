@@ -86,9 +86,15 @@ npm install
 ### 启动服务器
 
 ```bash
+# 全局安装后直接使用
+npm install -g @agents-uni/zhenhuan
+zhenhuan serve
+
+# 或在项目目录中
 npm start
-# 或
-npm run zhenhuan serve
+
+# 或用 npx（无需全局安装）
+npx @agents-uni/zhenhuan serve
 ```
 
 启动后会打印访问链接：
@@ -303,24 +309,27 @@ curl -X POST http://localhost:8089/api/race/dispatch \
 
 ## 命令行工具
 
+全局安装后可直接使用 `zhenhuan` 命令，也可通过 `npx @agents-uni/zhenhuan` 调用：
+
 ```bash
 # 启动服务器（默认端口 8089，启动后打印首页链接）
-npm run zhenhuan serve
+zhenhuan serve
+# 或: npx @agents-uni/zhenhuan serve
 
 # 查看后宫状态（品级、ELO、圣宠）
-npm run zhenhuan status
+zhenhuan status
 
 # 查看 ELO 排行榜
-npm run zhenhuan leaderboard
+zhenhuan leaderboard
 
 # 召开朝会（月度评审）
-npm run zhenhuan court
+zhenhuan court
 
 # 🆕 选秀 — 一键注册新 Agent
-npm run zhenhuan select --id new-agent --name "新秀女" --role 答应
+zhenhuan select --id new-agent --name "新秀女" --role 答应
 
 # 同时注册到 openclaw.json
-npm run zhenhuan select --id new-agent --name "新秀女" --register
+zhenhuan select --id new-agent --name "新秀女" --register
 ```
 
 ## 角色设计
