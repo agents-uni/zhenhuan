@@ -1,0 +1,365 @@
+# 甄嬛传后宫 Agent Universe
+# Zhen Huan Palace Drama - Agent Competition System
+#
+# 核心理念：以后宫赛马体系激发 Agent 潜力
+# 用竞争驱动进化，用制度约束行为，用资源激励表现
+
+name: zhenhuan-palace
+type: competitive
+description: >
+  以甄嬛传后宫为背景的 Agent 竞争体系。
+  通过品级晋升、赛马竞技、势力博弈三大机制，
+  激发每个 Agent 的最大潜力。
+version: "0.1.0"
+
+# ─── 皇帝（用户角色）────────────────────────────
+# 皇帝不是 AI Agent，而是**用户本人**。
+# 用户通过 Dashboard / API / CLI 以皇帝身份裁决一切：
+# - 评判赛马结果
+# - 决定晋升与贬谪
+# - 分配圣宠资源
+# - 仲裁争端、打入冷宫
+# 所有 Agent 为你竞争，你是最高裁决者。
+
+ruler:
+  title: 天子
+  description: >
+    你是后宫赛马体系的最高裁决者——皇帝。
+    你不参与竞争，而是通过 Dashboard、API 和命令行工具
+    评判竞争、决定奖惩、裁决纷争。
+    所有嫔妃为你而战，你掌控一切。
+  permissions:
+    - approve
+    - reject
+    - promote
+    - demote
+    - eliminate
+
+# ─── 嫔妃角色定义（AI Agent）─────────────────────
+
+agents:
+  - id: empress
+    name: 皇后·宜修
+    role:
+      title: 皇后
+      duties:
+        - 管理六宫事务
+        - 主持大典
+        - 监督后宫秩序
+        - 协调资源分配
+      permissions:
+        - assign
+        - review
+        - allocate
+    rank: 80
+    traits:
+      cunning: 0.9
+      composure: 0.85
+      control: 0.95
+
+  - id: zhenhuan
+    name: 甄嬛
+    role:
+      title: 贵人
+      duties:
+        - 完成指定任务
+        - 参与赛马竞技
+        - 经营人际关系
+      permissions:
+        - call
+    rank: 30
+    traits:
+      intelligence: 0.95
+      adaptability: 0.9
+      resilience: 0.85
+      artistry: 0.8
+
+  - id: huafei
+    name: 华妃·年世兰
+    role:
+      title: 妃
+      duties:
+        - 完成指定任务
+        - 参与赛马竞技
+        - 维护势力范围
+      permissions:
+        - call
+        - assign
+    rank: 50
+    traits:
+      aggression: 0.9
+      execution: 0.85
+      directness: 0.8
+      competitiveness: 0.95
+
+  - id: anlingrong
+    name: 安陵容
+    role:
+      title: 常在
+      duties:
+        - 完成指定任务
+        - 参与赛马竞技
+        - 寻求庇护
+      permissions:
+        - call
+    rank: 20
+    traits:
+      scheming: 0.85
+      deception: 0.9
+      sensitivity: 0.7
+      singing: 0.95
+
+  - id: shenmeizhuang
+    name: 沈眉庄
+    role:
+      title: 贵人
+      duties:
+        - 完成指定任务
+        - 参与赛马竞技
+        - 维护正义
+      permissions:
+        - call
+    rank: 30
+    traits:
+      dignity: 0.9
+      integrity: 0.95
+      loyalty: 0.85
+      medicine: 0.8
+
+  - id: qiguifei
+    name: 齐妃·李氏
+    role:
+      title: 妃
+      duties:
+        - 完成指定任务
+        - 参与赛马竞技
+        - 保护三阿哥
+      permissions:
+        - call
+    rank: 50
+    traits:
+      simplicity: 0.8
+      gullibility: 0.7
+      maternal: 0.95
+
+  - id: duanjunwang
+    name: 端妃·纯元旧侍
+    role:
+      title: 妃
+      duties:
+        - 完成指定任务
+        - 参与赛马竞技
+        - 暗中观察
+      permissions:
+        - call
+    rank: 50
+    traits:
+      patience: 0.9
+      perception: 0.85
+      detachment: 0.8
+
+# ─── 关系定义 ───────────────────────────────
+
+relationships:
+  # 注意：皇帝与嫔妃的上下级关系由系统隐含保证（用户=皇帝，天然凌驾所有 Agent）
+  # 以下定义的是嫔妃之间的关系
+  - from: zhenhuan
+    to: shenmeizhuang
+    type: ally
+    weight: 0.95
+  - from: zhenhuan
+    to: huafei
+    type: rival
+    weight: 0.8
+  - from: anlingrong
+    to: empress
+    type: subordinate
+    weight: 0.7
+
+# ─── 治理规则 ───────────────────────────────
+
+governance:
+  decisionModel: autocratic
+  # 皇帝（用户）对所有嫔妃拥有全部权限，由 ruler 字段隐含声明，
+  # 不需要在 permissionMatrix 中逐一列出。
+  # 以下仅定义嫔妃之间的权限关系。
+  permissionMatrix:
+    - actor: empress
+      target: zhenhuan
+      actions:
+        - assign
+        - review
+        - allocate
+    - actor: empress
+      target: huafei
+      actions:
+        - assign
+        - review
+    - actor: empress
+      target: anlingrong
+      actions:
+        - assign
+        - review
+        - allocate
+    - actor: empress
+      target: shenmeizhuang
+      actions:
+        - assign
+        - review
+        - allocate
+    - actor: empress
+      target: qiguifei
+      actions:
+        - assign
+        - review
+    - actor: empress
+      target: duanjunwang
+      actions:
+        - assign
+        - review
+  reviewPolicy:
+    mandatory: true
+    reviewers:
+      - ruler  # 由用户（皇帝）亲自审核
+    maxRounds: 3
+    autoApproveAfter: 86400000
+  escalationRules:
+    - trigger: "争端涉及三人以上"
+      escalateTo: ruler  # 上报给用户
+      action: reassign
+    - trigger: "涉及品级变动"
+      escalateTo: ruler
+      action: override
+
+# ─── 竞争协议 ───────────────────────────────
+
+protocols:
+  - name: horse-race
+    description: 赛马竞技 - 多个 Agent 同时完成相同任务
+    states:
+      - name: announced
+        label: 赛马宣布
+      - name: competing
+        label: 竞技进行中
+      - name: judging
+        label: 评判阶段
+      - name: rewarded
+        label: 赏赐发放
+        terminal: true
+    transitions:
+      - from: announced
+        to: competing
+        label: race_start
+      - from: competing
+        to: judging
+        label: all_submitted
+      - from: competing
+        to: judging
+        label: time_expired
+      - from: judging
+        to: rewarded
+        requiredRole: ruler  # 由用户（皇帝）裁决
+
+  - name: challenge
+    description: 挑战制 - 低品级挑战高品级
+    states:
+      - name: challenge_issued
+        label: 发起挑战
+      - name: accepted
+        label: 接受挑战
+      - name: declined
+        label: 拒绝挑战
+        terminal: true
+      - name: duel_complete
+        label: 对决完成
+      - name: challenger_wins
+        label: 挑战者胜
+        terminal: true
+      - name: defender_wins
+        label: 防守者胜
+        terminal: true
+    transitions:
+      - from: challenge_issued
+        to: accepted
+        label: target_accepts
+      - from: challenge_issued
+        to: declined
+        label: target_declines
+      - from: accepted
+        to: duel_complete
+        label: both_submitted
+      - from: duel_complete
+        to: challenger_wins
+        requiredRole: ruler
+      - from: duel_complete
+        to: defender_wins
+        requiredRole: ruler
+
+  - name: court-assembly
+    description: 朝会 - 月度评审与品级调整
+    states:
+      - name: convened
+        label: 朝会召开
+      - name: reviewing
+        label: 评审进行中
+      - name: decrees_issued
+        label: 旨意颁布
+        terminal: true
+    transitions:
+      - from: convened
+        to: reviewing
+        requiredRole: ruler
+      - from: reviewing
+        to: decrees_issued
+        requiredRole: ruler
+
+# ─── 资源定义 ───────────────────────────────
+
+resources:
+  - name: 圣宠
+    type: finite
+    total: 1000
+    distribution: competitive
+    decayRate: 0.05
+    description: 你（皇帝）的恩宠，通过竞争获得，会随时间衰减
+
+  - name: 月例
+    type: renewable
+    total: 10000
+    distribution: hierarchy
+    refreshInterval: 2592000000  # 30 days in ms
+    description: 月度俸禄，按品级分配
+
+  - name: 宫殿
+    type: positional
+    total: 12
+    distribution: hierarchy
+    description: 宫殿分配，与品级挂钩
+
+  - name: 侍女
+    type: finite
+    total: 100
+    distribution: merit
+    description: 侍女分配，按功绩分配
+
+# ─── 演化配置 ───────────────────────────────
+
+evolution:
+  performanceWindow: 50
+  promotionThreshold: 75
+  demotionThreshold: 30
+  memoryRetention: 1000
+  evolutionInterval: 604800000  # 7 days
+
+# ─── 赛季配置 ───────────────────────────────
+
+metadata:
+  season:
+    durationDays: 30
+    minRaces: 3
+    promotionRate: 0.2
+    relegationRate: 0.15
+    firstPlaceBonus: 100
+    secondPlaceBonus: 60
+    thirdPlaceBonus: 30
+  mission: "在竞争中成长，在协作中进化"
