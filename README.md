@@ -3,6 +3,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <p align="center">
+  <img src="assets/logo.png" alt="Agents Uni" width="120" />
+</p>
+<p align="center">
   <h1 align="center">zhenhuan-uni</h1>
   <p align="center">
     <strong>甄嬛后宫 Agent 赛马竞技系统</strong>
