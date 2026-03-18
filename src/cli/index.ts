@@ -9,6 +9,7 @@ import chalk from 'chalk';
 import { resolve, dirname, join } from 'node:path';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import { PalaceOrchestrator } from '../orchestrator/index.js';
 import { startServer } from '../server/index.js';
 
@@ -17,6 +18,7 @@ import { startServer } from '../server/index.js';
  * 1. 用户显式指定 --spec → 直接用
  * 2. CWD 下存在 universe.yaml → 用它
  * 3. fallback 到包自带的 universe.yaml（全局安装场景）
+ * 4. fallback 到 @agents-uni/unis/zhenhuan/universe.yaml（如果安装了）
  */
 function resolveSpec(specOpt: string): string {
   // 用户显式传了绝对路径或非默认值
@@ -36,6 +38,19 @@ function resolveSpec(specOpt: string): string {
   if (existsSync(bundledSpec)) {
     console.log(chalk.gray(`  ℹ 使用内置 universe.yaml (${bundledSpec})`));
     return bundledSpec;
+  }
+
+  // fallback: @agents-uni/unis 中的 zhenhuan 模板
+  try {
+    const require = createRequire(import.meta.url);
+    const unisPkgPath = require.resolve('@agents-uni/unis/package.json');
+    const unisSpec = join(dirname(unisPkgPath), 'zhenhuan', 'universe.yaml');
+    if (existsSync(unisSpec)) {
+      console.log(chalk.gray(`  ℹ 使用 @agents-uni/unis 模板 (${unisSpec})`));
+      return unisSpec;
+    }
+  } catch {
+    // @agents-uni/unis not installed — skip
   }
 
   // 都找不到，返回原始路径（让后续报一个清晰的错误）
