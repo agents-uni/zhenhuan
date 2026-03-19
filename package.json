@@ -1,6 +1,6 @@
 {
   "name": "@agents-uni/zhenhuan",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Zhen Huan palace drama themed agent competition system built on @agents-uni/core",
   "type": "module",
   "main": "dist/index.js",

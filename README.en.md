@@ -75,36 +75,35 @@ Built on [@agents-uni/core](https://github.com/agents-uni/core), it models a com
 
 ## Quick Start
 
-### Install
+### Zero-config Experience
+
+Install and launch immediately — the package ships with a complete palace configuration (7 concubine agents):
 
 ```bash
-# Use as a dependency
-npm install @agents-uni/zhenhuan
-
-# Or clone the repo for local development
-git clone https://github.com/agents-uni/zhenhuan.git
-cd zhenhuan
-npm install
-```
-
-### Start the server
-
-```bash
-# Global install, then use from any directory
 npm install -g @agents-uni/zhenhuan
 zhenhuan serve
 
-# Or in the project directory
-npm start
-
 # Or with npx (no global install needed)
 npx @agents-uni/zhenhuan serve
-
-# Use a custom spec file
-zhenhuan serve --spec /path/to/my-universe.yaml
 ```
 
-> 💡 **Path resolution**: `zhenhuan` first looks for `universe.yaml` in the current directory. If not found, it automatically uses the built-in default palace configuration. You can also specify a custom spec file with `--spec`.
+> 💡 `zhenhuan` CLI path resolution: first checks for `universe.yaml` in the current directory; if not found, falls back to the built-in palace configuration. You can also specify a custom path with `--spec`.
+
+### Custom Project
+
+If you want to modify concubine configurations, add new agents, or use group chat with `@agents-uni/chat`, create a local project:
+
+```bash
+# Initialize a project (generates universe.yaml in current directory)
+mkdir my-palace && cd my-palace
+npx uni init my-palace --uni zhenhuan
+
+# Edit universe.yaml to customize concubines...
+
+# Deploy to OpenClaw and start
+npx uni deploy
+zhenhuan serve
+```
 
 On startup, it prints the access URLs:
 
@@ -417,15 +416,19 @@ universe.yaml
 
 ### Deploy Agents to OpenClaw
 
-```bash
-# One-command deploy
-npx uni deploy universe.yaml
+> 💡 `zhenhuan serve` auto-registers agents on startup — manual deployment is only needed when using OpenClaw workspaces without the server.
 
-# Custom directory
-npx uni deploy universe.yaml --dir ~/.openclaw
+If you have a local project directory (created via `uni init` or cloned from the repo), run in that directory:
+
+```bash
+# Auto-detects universe.yaml in current directory
+npx uni deploy
+
+# Custom OpenClaw directory
+npx uni deploy --dir ~/.openclaw
 
 # Dry run (preview only)
-npx uni deploy universe.yaml --dry-run
+npx uni deploy --dry-run
 ```
 
 Or use pre-built SOUL.md files (hand-tuned with richer personality descriptions):
@@ -463,34 +466,48 @@ const { dispatch, race } = await orchestrator.dispatchAndRace(
 
 ## Group Chat (with @agents-uni/chat)
 
-Horse racing is the "arena"; group chat is "daily life". With [@agents-uni/chat](https://github.com/agents-uni/chat), your concubines can talk freely in a shared chat room — forming alliances, arguing, scheming — and their relationships evolve in real time based on the conversation.
+Horse racing is the "arena"; group chat is "daily life". [@agents-uni/chat](https://github.com/agents-uni/chat) lets your concubines talk freely in a shared chat room — forming alliances, arguing, scheming — and their relationships evolve in real time based on the conversation.
 
 ### Quick Start
 
+`agents-chat` needs to read `universe.yaml` to know which concubines exist and their relationships. You need a local project directory:
+
 ```bash
-# Install the chat package
-npm install -g @agents-uni/chat
+# 1. Initialize a palace project (generates universe.yaml)
+mkdir my-palace && cd my-palace
+npx uni init my-palace --uni zhenhuan
 
-# Deploy agents first (if not already deployed)
-uni deploy
+# 2. Deploy agents to OpenClaw workspaces (generates SOUL.md etc.)
+npx uni deploy
 
-# Start group chat in the directory containing universe.yaml
-agents-chat serve
-# Or specify the config file
-agents-chat serve --spec /path/to/universe.yaml
+# 3. Start group chat (auto-detects universe.yaml in current directory)
+npx agents-chat serve
 ```
 
 Open `http://localhost:3000` in your browser. You are the Emperor — concubines respond automatically based on the topic.
 
+> 💡 If you don't want to initialize a project, you can point directly to the bundled config:
+> ```bash
+> agents-chat serve --spec node_modules/@agents-uni/zhenhuan/universe.yaml
+> ```
+
 ### Racing + Chat Combined
 
-Both share the same `universe.yaml` and OpenClaw workspaces, and can be used simultaneously or alternately:
+Both share the same `universe.yaml` and OpenClaw workspaces. Run them side by side from the same project directory:
 
-| Scenario | Which to use | Command |
-|----------|-------------|---------|
+```bash
+# Terminal 1: Horse racing (port 8089)
+zhenhuan serve
+
+# Terminal 2: Group chat (port 3000)
+agents-chat serve
+```
+
+| Scenario | Which to use | Notes |
+|----------|-------------|-------|
 | Concubines compete on the same task, ELO ranking | `zhenhuan serve` | Horse race |
 | Concubines chat freely, observe interactions | `agents-chat serve` | Group chat |
-| Discuss approaches first, then compete on execution | Both alternately | Chat then race |
+| Discuss approaches first, then compete on execution | Both together | Chat then race |
 
 ### Relationship Evolution in Chat
 
@@ -509,12 +526,14 @@ These changes are reflected in real time on the chat UI's relationship graph. Co
 import { PalaceOrchestrator } from '@agents-uni/zhenhuan';
 import { ChatEngine } from '@agents-uni/chat';
 
-// Initialize the palace
-const orchestrator = await PalaceOrchestrator.fromSpec('universe.yaml');
+const specPath = 'universe.yaml'; // same config file
 
-// Start chat engine with the same config
+// Horse racing engine
+const orchestrator = await PalaceOrchestrator.fromSpec(specPath);
+
+// Group chat engine
 const chat = new ChatEngine({
-  specPath: 'universe.yaml',
+  specPath,
   maxRespondents: 3,
   contextWindow: 20,
 });

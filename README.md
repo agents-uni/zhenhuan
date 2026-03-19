@@ -75,36 +75,35 @@
 
 ## 快速开始
 
-### 安装
+### 零配置体验
+
+安装后直接启动，包自带完整的甄嬛后宫配置（7 个嫔妃 Agent）：
 
 ```bash
-# 作为依赖使用
-npm install @agents-uni/zhenhuan
-
-# 或克隆仓库本地开发
-git clone https://github.com/agents-uni/zhenhuan.git
-cd zhenhuan
-npm install
-```
-
-### 启动服务器
-
-```bash
-# 全局安装后，在任意目录直接使用
 npm install -g @agents-uni/zhenhuan
 zhenhuan serve
 
-# 或在项目目录中
-npm start
-
 # 或用 npx（无需全局安装）
 npx @agents-uni/zhenhuan serve
-
-# 使用自定义规范文件
-zhenhuan serve --spec /path/to/my-universe.yaml
 ```
 
-> 💡 **路径解析逻辑**：`zhenhuan` 会优先查找当前目录下的 `universe.yaml`，找不到时自动使用包自带的默认甄嬛后宫配置。你也可以通过 `--spec` 显式指定规范文件路径。
+> 💡 `zhenhuan` CLI 的路径解析逻辑：优先使用当前目录的 `universe.yaml`，找不到时自动回退到包自带的默认后宫配置。你也可以通过 `--spec` 显式指定。
+
+### 自定义项目
+
+如果你想修改嫔妃配置、添加新 Agent，或配合 `@agents-uni/chat` 群聊使用，需要在本地建一个项目：
+
+```bash
+# 初始化项目（生成 universe.yaml 到当前目录）
+mkdir my-palace && cd my-palace
+npx uni init my-palace --uni zhenhuan
+
+# 编辑 universe.yaml 自定义嫔妃...
+
+# 部署到 OpenClaw 并启动
+npx uni deploy
+zhenhuan serve
+```
 
 启动后会打印访问链接：
 
@@ -417,15 +416,19 @@ universe.yaml
 
 ### 部署 Agent 到 OpenClaw
 
-```bash
-# CLI 一键部署
-npx uni deploy universe.yaml
+> 💡 `zhenhuan serve` 会自动注册 Agent，无需手动部署。只有在你想单独使用 OpenClaw 工作区（不启动服务器）时才需要手动部署。
 
-# 指定目录
-npx uni deploy universe.yaml --dir ~/.openclaw
+如果你有本地项目目录（通过 `uni init` 创建，或克隆仓库），在该目录下运行：
+
+```bash
+# 自动读取当前目录的 universe.yaml
+npx uni deploy
+
+# 指定 OpenClaw 目录
+npx uni deploy --dir ~/.openclaw
 
 # 预览（不实际写入）
-npx uni deploy universe.yaml --dry-run
+npx uni deploy --dry-run
 ```
 
 或使用预置 SOUL.md（手工调优版，包含更丰富的性格描写）：
@@ -463,45 +466,59 @@ const { dispatch, race } = await orchestrator.dispatchAndRace(
 
 ## 群聊模式（配合 @agents-uni/chat）
 
-赛马竞技是"比武"，群聊是"日常"。通过 [@agents-uni/chat](https://github.com/agents-uni/chat) 可以让后宫嫔妃们在同一个聊天室里自由对话——结盟、争吵、密谋都会自然发生，关系也会随对话内容实时演化。
+赛马竞技是"比武"，群聊是"日常"。[@agents-uni/chat](https://github.com/agents-uni/chat) 让后宫嫔妃们在同一个聊天室自由对话——结盟、争吵、密谋都会自然发生，关系随对话内容实时演化。
 
 ### 快速启动
 
+`agents-chat` 需要读取 `universe.yaml` 来了解有哪些嫔妃以及她们之间的关系。你需要先在本地建一个项目目录：
+
 ```bash
-# 安装 chat 包
-npm install -g @agents-uni/chat
+# 1. 初始化后宫项目（会生成 universe.yaml 到当前目录）
+mkdir my-palace && cd my-palace
+npx uni init my-palace --uni zhenhuan
 
-# 先部署 Agent（如果还没部署过）
-uni deploy
+# 2. 部署 Agent 到 OpenClaw 工作区（生成 SOUL.md 等文件）
+npx uni deploy
 
-# 在甄嬛后宫的 universe.yaml 目录下启动群聊
-agents-chat serve
-# 或指定配置文件
-agents-chat serve --spec /path/to/universe.yaml
+# 3. 启动群聊（自动读取当前目录的 universe.yaml）
+npx agents-chat serve
 ```
 
-浏览器打开 `http://localhost:3000`，你就是皇帝，嫔妃们会根据话题自动应答。
+浏览器打开 `http://localhost:3000`，你就是皇帝，嫔妃们根据话题自动应答。
+
+> 💡 如果不想初始化项目，也可以用 `--spec` 直接指向包自带的配置：
+> ```bash
+> agents-chat serve --spec node_modules/@agents-uni/zhenhuan/universe.yaml
+> ```
 
 ### 赛马 + 群聊 配合使用
 
-两者共享同一个 `universe.yaml` 和 OpenClaw 工作区，可以同时或交替使用：
+两者共享同一个 `universe.yaml` 和 OpenClaw 工作区，在同一个项目目录下交替使用：
 
-| 场景 | 用哪个 | 命令 |
+```bash
+# 终端 1：赛马竞技（端口 8089）
+zhenhuan serve
+
+# 终端 2：群聊模式（端口 3000）
+agents-chat serve
+```
+
+| 场景 | 用哪个 | 说明 |
 |------|--------|------|
 | 让嫔妃们竞争同一任务、ELO 排名 | `zhenhuan serve` | 赛马竞技 |
 | 让嫔妃们自由对话、观察互动 | `agents-chat serve` | 群聊模式 |
-| 先群聊讨论方案，再赛马比拼执行 | 两者交替 | 先聊后赛 |
+| 先群聊讨论方案，再赛马比拼执行 | 两者同时 | 先聊后赛 |
 
 ### 群聊中的关系演化
 
-`@agents-uni/chat` 内置了关系推理引擎，会从对话中自动检测：
+`@agents-uni/chat` 内置关系推理引擎，从对话中自动检测：
 
 - **赞同** — 信任度 +0.05，亲密度 +0.03
 - **反对** — 竞争度 +0.03
 - **协作** — 协同度 +0.05
 - **共识** — 信任度 +0.02，协同度 +0.02
 
-这些关系变化会实时反映在聊天界面的关系图谱中。配合赛马的 ELO 排名，你可以全方位观察嫔妃们的能力和社交动态。
+这些变化实时反映在聊天界面的关系图谱中。配合赛马的 ELO 排名，你可以全方位观察嫔妃们的能力和社交动态。
 
 ### 编程式集成
 
@@ -509,12 +526,14 @@ agents-chat serve --spec /path/to/universe.yaml
 import { PalaceOrchestrator } from '@agents-uni/zhenhuan';
 import { ChatEngine } from '@agents-uni/chat';
 
-// 先初始化后宫
-const orchestrator = await PalaceOrchestrator.fromSpec('universe.yaml');
+const specPath = 'universe.yaml'; // 同一份配置文件
 
-// 用同一份配置启动群聊引擎
+// 赛马引擎
+const orchestrator = await PalaceOrchestrator.fromSpec(specPath);
+
+// 群聊引擎
 const chat = new ChatEngine({
-  specPath: 'universe.yaml',
+  specPath,
   maxRespondents: 3,
   contextWindow: 20,
 });
