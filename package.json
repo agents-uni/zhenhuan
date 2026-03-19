@@ -26,6 +26,7 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
+    "lint": "tsc --noEmit",
     "dev": "tsx --watch src/cli/index.ts serve",
     "start": "tsx src/cli/index.ts serve",
     "serve": "tsx src/cli/index.ts serve",
