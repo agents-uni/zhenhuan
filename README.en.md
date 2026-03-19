@@ -21,6 +21,7 @@
   <a href="#quick-start">Quick Start</a> &bull;
   <a href="#competition-mechanics">Competition</a> &bull;
   <a href="#palace-system">Palace System</a> &bull;
+  <a href="#group-chat-with-agents-unichat">Group Chat</a> &bull;
   <a href="#rest-api">API</a> &bull;
   <a href="./DESIGN.md">Design Doc</a>
 </p>
@@ -460,6 +461,71 @@ const { dispatch, race } = await orchestrator.dispatchAndRace(
 
 > 📖 Full integration tutorial: [OPENCLAW_INTEGRATION_GUIDE.md](https://github.com/agents-uni/zhenhuan/blob/main/OPENCLAW_INTEGRATION_GUIDE.md)
 
+## Group Chat (with @agents-uni/chat)
+
+Horse racing is the "arena"; group chat is "daily life". With [@agents-uni/chat](https://github.com/agents-uni/chat), your concubines can talk freely in a shared chat room — forming alliances, arguing, scheming — and their relationships evolve in real time based on the conversation.
+
+### Quick Start
+
+```bash
+# Install the chat package
+npm install -g @agents-uni/chat
+
+# Deploy agents first (if not already deployed)
+uni deploy
+
+# Start group chat in the directory containing universe.yaml
+agents-chat serve
+# Or specify the config file
+agents-chat serve --spec /path/to/universe.yaml
+```
+
+Open `http://localhost:3000` in your browser. You are the Emperor — concubines respond automatically based on the topic.
+
+### Racing + Chat Combined
+
+Both share the same `universe.yaml` and OpenClaw workspaces, and can be used simultaneously or alternately:
+
+| Scenario | Which to use | Command |
+|----------|-------------|---------|
+| Concubines compete on the same task, ELO ranking | `zhenhuan serve` | Horse race |
+| Concubines chat freely, observe interactions | `agents-chat serve` | Group chat |
+| Discuss approaches first, then compete on execution | Both alternately | Chat then race |
+
+### Relationship Evolution in Chat
+
+`@agents-uni/chat` includes a built-in relationship inference engine that detects signals from conversations:
+
+- **Agreement** — trust +0.05, affinity +0.03
+- **Disagreement** — rivalry +0.03
+- **Collaboration** — synergy +0.05
+- **Consensus** — trust +0.02, synergy +0.02
+
+These changes are reflected in real time on the chat UI's relationship graph. Combined with ELO rankings from horse racing, you get a full picture of each concubine's ability and social dynamics.
+
+### Programmatic Integration
+
+```typescript
+import { PalaceOrchestrator } from '@agents-uni/zhenhuan';
+import { ChatEngine } from '@agents-uni/chat';
+
+// Initialize the palace
+const orchestrator = await PalaceOrchestrator.fromSpec('universe.yaml');
+
+// Start chat engine with the same config
+const chat = new ChatEngine({
+  specPath: 'universe.yaml',
+  maxRespondents: 3,
+  contextWindow: 20,
+});
+
+// Chat: let concubines discuss
+const responses = await chat.processMessage('How should we improve palace cuisine?');
+
+// Race: let them compete formally
+const { race } = await orchestrator.dispatchAndRace(task, judge);
+```
+
 ## Dashboard Integration
 
 zhenhuan-uni integrates deeply with the agents-uni-core Dashboard, providing a unified web UI for managing the palace system.
@@ -568,6 +634,7 @@ npm run build
 ## Related Projects
 
 - [**@agents-uni/core**](https://github.com/agents-uni/core) — The universal protocol layer this project is built on ([npm](https://www.npmjs.com/package/@agents-uni/core))
+- [**@agents-uni/chat**](https://github.com/agents-uni/chat) — Group chat service for agent universes with real-time relationship evolution ([npm](https://www.npmjs.com/package/@agents-uni/chat))
 
 ## License
 

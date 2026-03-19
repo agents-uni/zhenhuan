@@ -21,6 +21,7 @@
   <a href="#快速开始">快速开始</a> &bull;
   <a href="#竞争机制">竞争机制</a> &bull;
   <a href="#后宫体系">后宫体系</a> &bull;
+  <a href="#群聊模式配合-agents-unichat">群聊模式</a> &bull;
   <a href="#rest-api">API</a> &bull;
   <a href="./DESIGN.md">设计文档</a>
 </p>
@@ -460,6 +461,71 @@ const { dispatch, race } = await orchestrator.dispatchAndRace(
 
 > 📖 详细整合教程见 [OPENCLAW_INTEGRATION_GUIDE.md](https://github.com/agents-uni/zhenhuan/blob/main/OPENCLAW_INTEGRATION_GUIDE.md)
 
+## 群聊模式（配合 @agents-uni/chat）
+
+赛马竞技是"比武"，群聊是"日常"。通过 [@agents-uni/chat](https://github.com/agents-uni/chat) 可以让后宫嫔妃们在同一个聊天室里自由对话——结盟、争吵、密谋都会自然发生，关系也会随对话内容实时演化。
+
+### 快速启动
+
+```bash
+# 安装 chat 包
+npm install -g @agents-uni/chat
+
+# 先部署 Agent（如果还没部署过）
+uni deploy
+
+# 在甄嬛后宫的 universe.yaml 目录下启动群聊
+agents-chat serve
+# 或指定配置文件
+agents-chat serve --spec /path/to/universe.yaml
+```
+
+浏览器打开 `http://localhost:3000`，你就是皇帝，嫔妃们会根据话题自动应答。
+
+### 赛马 + 群聊 配合使用
+
+两者共享同一个 `universe.yaml` 和 OpenClaw 工作区，可以同时或交替使用：
+
+| 场景 | 用哪个 | 命令 |
+|------|--------|------|
+| 让嫔妃们竞争同一任务、ELO 排名 | `zhenhuan serve` | 赛马竞技 |
+| 让嫔妃们自由对话、观察互动 | `agents-chat serve` | 群聊模式 |
+| 先群聊讨论方案，再赛马比拼执行 | 两者交替 | 先聊后赛 |
+
+### 群聊中的关系演化
+
+`@agents-uni/chat` 内置了关系推理引擎，会从对话中自动检测：
+
+- **赞同** — 信任度 +0.05，亲密度 +0.03
+- **反对** — 竞争度 +0.03
+- **协作** — 协同度 +0.05
+- **共识** — 信任度 +0.02，协同度 +0.02
+
+这些关系变化会实时反映在聊天界面的关系图谱中。配合赛马的 ELO 排名，你可以全方位观察嫔妃们的能力和社交动态。
+
+### 编程式集成
+
+```typescript
+import { PalaceOrchestrator } from '@agents-uni/zhenhuan';
+import { ChatEngine } from '@agents-uni/chat';
+
+// 先初始化后宫
+const orchestrator = await PalaceOrchestrator.fromSpec('universe.yaml');
+
+// 用同一份配置启动群聊引擎
+const chat = new ChatEngine({
+  specPath: 'universe.yaml',
+  maxRespondents: 3,
+  contextWindow: 20,
+});
+
+// 群聊：让嫔妃们讨论
+const responses = await chat.processMessage('各位觉得如何提升后宫膳食质量？');
+
+// 赛马：让她们正式比拼
+const { race } = await orchestrator.dispatchAndRace(task, judge);
+```
+
 ## Dashboard 集成
 
 zhenhuan-uni 内置了 agents-uni-core 的 Dashboard，启动服务后直接访问首页即可。
@@ -570,6 +636,7 @@ npm run build
 ## 相关项目
 
 - [**@agents-uni/core**](https://github.com/agents-uni/core) — 本项目底层的通用 Agent 组织协议层 ([npm](https://www.npmjs.com/package/@agents-uni/core))
+- [**@agents-uni/chat**](https://github.com/agents-uni/chat) — 群聊服务，让 Agent 们在浏览器中自由对话，关系实时演化 ([npm](https://www.npmjs.com/package/@agents-uni/chat))
 
 ## License
 
