@@ -23,6 +23,7 @@
   <a href="#后宫体系">后宫体系</a> &bull;
   <a href="#群聊模式配合-agents-unichat">群聊模式</a> &bull;
   <a href="#rest-api">API</a> &bull;
+  <a href="#生态系统">生态系统</a> &bull;
   <a href="./DESIGN.md">设计文档</a>
 </p>
 
@@ -462,7 +463,7 @@ const { dispatch, race } = await orchestrator.dispatchAndRace(
 // POST /api/race/dispatch
 ```
 
-> 📖 详细整合教程见 [OPENCLAW_INTEGRATION_GUIDE.md](https://github.com/agents-uni/zhenhuan/blob/main/OPENCLAW_INTEGRATION_GUIDE.md)
+> 📖 设计理念和架构决策详见 [DESIGN.md](./DESIGN.md)
 
 ## 群聊模式（配合 @agents-uni/chat）
 
@@ -652,10 +653,88 @@ npm run dev
 npm run build
 ```
 
-## 相关项目
+## 生态系统
 
-- [**@agents-uni/core**](https://github.com/agents-uni/core) — 本项目底层的通用 Agent 组织协议层 ([npm](https://www.npmjs.com/package/@agents-uni/core))
-- [**@agents-uni/chat**](https://github.com/agents-uni/chat) — 群聊服务，让 Agent 们在浏览器中自由对话，关系实时演化 ([npm](https://www.npmjs.com/package/@agents-uni/chat))
+zhenhuan-uni 是 agents-uni 生态的标杆应用，展示如何基于底层协议构建完整的 Agent 竞争系统。
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    agents-uni 生态全景                        │
+│                                                              │
+│  @agents-uni/core          协议层 — 定义 Agent 组织的通用规范  │
+│       ├── Universe 规范     (universe.yaml 解析与校验)        │
+│       ├── Agent Registry    (注册、发现、生命周期管理)        │
+│       ├── Relationship Graph(关系图谱、BFS 派系发现)          │
+│       ├── State Machine     (协议状态机、流程编排)            │
+│       ├── EventBus          (事件驱动的松耦合通信)            │
+│       ├── TaskDispatcher    (TASK.md → SUBMISSION.md 调度)    │
+│       ├── Dashboard         (Web UI + 扩展机制)               │
+│       └── CLI: uni          (init/deploy/validate/inspect)    │
+│                                                              │
+│  @agents-uni/zhenhuan  ←── 竞争层 — 本项目                    │
+│       ├── ELO 竞技场        (ELO 评分、K 因子、地板机制)      │
+│       ├── 赛马引擎          (多 Agent 同任务竞争)             │
+│       ├── 后宫体系          (品级、资源、势力、冷宫)          │
+│       ├── 赛季制度          (赛季、朝会、晋升降级)            │
+│       └── CLI: zhenhuan     (serve/status/leaderboard/court)  │
+│                                                              │
+│  @agents-uni/chat          社交层 — Agent 群聊                │
+│       ├── 多 Agent 聊天室   (话题驱动、自动应答)              │
+│       ├── 关系推理引擎      (从对话中推断信任/竞争/协同)      │
+│       └── 实时关系图谱      (浏览器可视化)                    │
+│                                                              │
+│  @agents-uni/rel           关系层 — 关系建模基础库             │
+│       └── 多维关系模型      (信任、竞争、亲密、协同等维度)    │
+│                                                              │
+│  @agents-uni/unis          模板层 — 预置组织模板               │
+│       └── 竞技场/企业/军事/扁平... (universe.yaml 模板库)     │
+│                                                              │
+│  OpenClaw                  运行层 — Agent 运行时环境           │
+│       └── 文件协议          (SOUL.md / TASK.md / SUBMISSION.md)│
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 包之间的关系
+
+| 包 | 角色 | zhenhuan 如何使用它 |
+|---|---|---|
+| [@agents-uni/core](https://github.com/agents-uni/core) | 协议基座 | Universe 解析、Agent 注册、TaskDispatcher、Dashboard、CLI (`uni`) |
+| [@agents-uni/chat](https://github.com/agents-uni/chat) | 群聊引擎 | 共享 `universe.yaml`，嫔妃在聊天室自由对话，关系实时演化 |
+| [@agents-uni/rel](https://github.com/agents-uni/rel) | 关系建模 | 多维关系（信任/竞争/亲密/协同），被 core 和 chat 内部依赖 |
+| [@agents-uni/unis](https://github.com/agents-uni/unis) | 组织模板 | `uni init --uni zhenhuan` 从模板库拉取后宫配置 |
+| [OpenClaw](https://github.com/anthropics/openclaw) | Agent 运行时 | 文件协议：SOUL.md（身份）→ TASK.md（任务）→ SUBMISSION.md（提交） |
+
+### 从零到一的完整流程
+
+```bash
+# 1. 初始化项目 — 从 @agents-uni/unis 模板生成 universe.yaml
+npx uni init my-palace --uni zhenhuan
+
+# 2. 部署 — core 的 CLI 将 universe.yaml 编译为 SOUL.md 并写入 OpenClaw
+npx uni deploy
+
+# 3. 启动赛马 — zhenhuan 的竞争引擎开始调度
+zhenhuan serve                    # 端口 8089
+
+# 4. 启动群聊（可选）— chat 读取同一份 universe.yaml
+npx agents-chat serve             # 端口 3000
+
+# 5. 验证 / 检查 / 可视化 — core 的 CLI 工具
+npx uni validate                  # 校验 universe.yaml
+npx uni inspect                   # 查看 Agent 详情
+npx uni visualize                 # 可视化关系图谱
+```
+
+### 如果你想基于 core 创建自己的 Uni
+
+zhenhuan-uni 本身就是最好的参考实现。核心步骤：
+
+1. **定义 `universe.yaml`** — 参考 [core 的规范文档](https://github.com/agents-uni/core#universe-规范) 或直接参考 zhenhuan 的 `universe.yaml`
+2. **实现竞争/协作逻辑** — 使用 core 提供的 `TaskDispatcher`、`PerformanceTracker`、`EventBus` 等原语
+3. **部署到 OpenClaw** — `uni deploy` 自动生成 SOUL.md 并注册 Agent
+4. **扩展 Dashboard** — 通过 `DashboardExtension` 接口注入自定义面板
+
+详细的架构设计和决策过程见 [DESIGN.md](./DESIGN.md)。
 
 ## License
 

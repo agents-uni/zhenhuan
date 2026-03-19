@@ -23,6 +23,7 @@
   <a href="#palace-system">Palace System</a> &bull;
   <a href="#group-chat-with-agents-unichat">Group Chat</a> &bull;
   <a href="#rest-api">API</a> &bull;
+  <a href="#ecosystem">Ecosystem</a> &bull;
   <a href="./DESIGN.md">Design Doc</a>
 </p>
 
@@ -462,7 +463,7 @@ const { dispatch, race } = await orchestrator.dispatchAndRace(
 // POST /api/race/dispatch
 ```
 
-> 📖 Full integration tutorial: [OPENCLAW_INTEGRATION_GUIDE.md](https://github.com/agents-uni/zhenhuan/blob/main/OPENCLAW_INTEGRATION_GUIDE.md)
+> 📖 Design philosophy and architecture decisions: [DESIGN.md](./DESIGN.md)
 
 ## Group Chat (with @agents-uni/chat)
 
@@ -650,10 +651,88 @@ npm run dev
 npm run build
 ```
 
-## Related Projects
+## Ecosystem
 
-- [**@agents-uni/core**](https://github.com/agents-uni/core) — The universal protocol layer this project is built on ([npm](https://www.npmjs.com/package/@agents-uni/core))
-- [**@agents-uni/chat**](https://github.com/agents-uni/chat) — Group chat service for agent universes with real-time relationship evolution ([npm](https://www.npmjs.com/package/@agents-uni/chat))
+zhenhuan-uni is the flagship application of the agents-uni ecosystem, demonstrating how to build a complete agent competition system on top of the protocol layer.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 agents-uni Ecosystem Overview                │
+│                                                              │
+│  @agents-uni/core          Protocol layer                    │
+│       ├── Universe Spec     (universe.yaml parsing/validation│
+│       ├── Agent Registry    (registration, discovery, lifecycle│
+│       ├── Relationship Graph(graph modeling, BFS factions)   │
+│       ├── State Machine     (protocol state machines)        │
+│       ├── EventBus          (event-driven communication)     │
+│       ├── TaskDispatcher    (TASK.md → SUBMISSION.md dispatch)│
+│       ├── Dashboard         (Web UI + extension mechanism)   │
+│       └── CLI: uni          (init/deploy/validate/inspect)   │
+│                                                              │
+│  @agents-uni/zhenhuan  ←── Competition layer (this project)  │
+│       ├── ELO Arena         (ELO scoring, K-factor, floor)   │
+│       ├── Horse Race Engine (multi-agent same-task competition│
+│       ├── Palace System     (ranks, resources, factions, exile│
+│       ├── Season System     (seasons, court assemblies)      │
+│       └── CLI: zhenhuan     (serve/status/leaderboard/court) │
+│                                                              │
+│  @agents-uni/chat          Social layer                      │
+│       ├── Multi-agent Chat  (topic-driven, auto-respond)     │
+│       ├── Relationship Engine(infer trust/rivalry from chat)  │
+│       └── Live Relationship Graph (browser visualization)    │
+│                                                              │
+│  @agents-uni/rel           Relationship layer                │
+│       └── Multi-dim Relations(trust, rivalry, affinity, etc.) │
+│                                                              │
+│  @agents-uni/unis          Template layer                    │
+│       └── Arena/Corp/Military/Flat... (universe.yaml templates│
+│                                                              │
+│  OpenClaw                  Runtime layer                     │
+│       └── File Protocol     (SOUL.md / TASK.md / SUBMISSION.md│
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Package Relationships
+
+| Package | Role | How zhenhuan uses it |
+|---|---|---|
+| [@agents-uni/core](https://github.com/agents-uni/core) | Protocol foundation | Universe parsing, Agent registry, TaskDispatcher, Dashboard, CLI (`uni`) |
+| [@agents-uni/chat](https://github.com/agents-uni/chat) | Chat engine | Shares `universe.yaml`, concubines chat freely, relationships evolve in real time |
+| [@agents-uni/rel](https://github.com/agents-uni/rel) | Relationship modeling | Multi-dimensional relations (trust/rivalry/affinity/synergy), used internally by core and chat |
+| [@agents-uni/unis](https://github.com/agents-uni/unis) | Org templates | `uni init --uni zhenhuan` pulls palace config from the template library |
+| [OpenClaw](https://github.com/anthropics/openclaw) | Agent runtime | File protocol: SOUL.md (identity) → TASK.md (task) → SUBMISSION.md (output) |
+
+### End-to-End Workflow
+
+```bash
+# 1. Initialize — pull a universe.yaml template from @agents-uni/unis
+npx uni init my-palace --uni zhenhuan
+
+# 2. Deploy — core CLI compiles universe.yaml into SOUL.md files in OpenClaw
+npx uni deploy
+
+# 3. Start racing — zhenhuan's competition engine begins dispatching
+zhenhuan serve                    # port 8089
+
+# 4. Start group chat (optional) — chat reads the same universe.yaml
+npx agents-chat serve             # port 3000
+
+# 5. Validate / inspect / visualize — core CLI tools
+npx uni validate                  # validate universe.yaml
+npx uni inspect                   # view agent details
+npx uni visualize                 # visualize relationship graph
+```
+
+### Building Your Own Uni on Core
+
+zhenhuan-uni itself is the best reference implementation. Key steps:
+
+1. **Define `universe.yaml`** — refer to [core's spec docs](https://github.com/agents-uni/core#universe-spec) or zhenhuan's `universe.yaml` as a template
+2. **Implement competition/collaboration logic** — using core's `TaskDispatcher`, `PerformanceTracker`, `EventBus` primitives
+3. **Deploy to OpenClaw** — `uni deploy` auto-generates SOUL.md and registers agents
+4. **Extend the Dashboard** — inject custom panels via the `DashboardExtension` interface
+
+For detailed architecture and design decisions, see [DESIGN.md](./DESIGN.md).
 
 ## License
 
